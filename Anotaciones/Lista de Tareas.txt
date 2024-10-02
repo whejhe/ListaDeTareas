@@ -1,0 +1,5 @@
+Instala Node.js y npm
+Instala React Native CLI o Expo CLI
+Utiliza react-native init o expo init para iniciar un nuevo proyecto
+Aprender a usar Flexbox para layouts
+Aprender a usar StyleSheet para crear estilos

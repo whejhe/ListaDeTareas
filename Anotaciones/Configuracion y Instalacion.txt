@@ -10,3 +10,13 @@ npx expo install react-native-web react-dom @expo/metro-runtime
 
 Iniciar Proyecto:
 npm start
+
+Persistencia de Datos (Almacenamiento Local)
+npm install @react-native-async-storage/async-storage
+
+Usar una Librería Compatible con Web y Móvil para Fechas
+npm install react-native-paper-dates
+npm install react-native-paper
+
+
+

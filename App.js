@@ -1,94 +1,197 @@
-import React from 'react';
-import { SafeAreaView, View, FlatList, StyleSheet, Text, StatusBar, Pressable } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Pressable, Button, Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
-const DATA = [
-  {
-    id: '1',
-    title: 'Primera Tarea',
-  },
-  {
-    id: '2',
-    title: 'Segunda Tarea',
-  },
-  {
-    id: '3',
-    title: 'Tercera Tarea',
-  },
-  {
-    id: '4',
-    title: 'Primera Tarea',
-  },
-  {
-    id: '5',
-    title: 'Segunda Tarea',
-  },
-  {
-    id: '6',
-    title: 'Tercera Tarea',
-  },
-  {
-    id: '7',
-    title: 'Primera Tarea',
-  },
-  {
-    id: '8',
-    title: 'Segunda Tarea',
-  },
-  {
-    id: '9',
-    title: 'Tercera Tarea',
-  },
-  {
-    id: '10',
-    title: 'Primera Tarea',
-  },
-  {
-    id: '11',
-    title: 'Segunda Tarea',
-  },
-  {
-    id: '12',
-    title: 'Tercera Tarea',
-  },
-];
 
-const Item = ({ title }) => (
-  <View 
-  style={styles.item}
-  onPress={() => console.log(title)}
-  >
-    <Text style={styles.title}>{title}</Text>
-  </View>
-);
 
-const App = () => {
+export default function App() {
+  const [tarea, setTarea] = useState('');
+  const [tareas, setTareas] = useState([]);
+  const [fecha, setFecha] = useState(new Date());
+  const [mostrarPicker, setMostrarPicker] = useState(false);
+  const [modoPicker, setModoPicker] = useState('date'); // Puede ser 'date' o 'time'
+
+  useEffect(() => {
+    const obtenerTareas = async () => {
+      const tareasAlmacenadas = await cargarTareas();
+      if (tareasAlmacenadas) {
+        setTareas(tareasAlmacenadas);
+      }
+    };
+    obtenerTareas();
+  }, []);
+
+  const añadirtarea = () => {
+    if (tarea.length > 0) {
+      const nuevasTareas = [...tareas, { 
+        key: Math.random().toString(), 
+        text: tarea, 
+        completed: false, 
+        fecha: fecha.toLocaleDateString(), 
+        hora: fecha.toLocaleTimeString() 
+      }];
+      setTareas(nuevasTareas);
+      setTarea(''); // Limpia el input después de añadir una nueva tarea
+      guardarTareas(nuevasTareas);
+    }
+  };
+
+  const completarTarea = (id) => {
+    const nuevasTareas = tareas.map((item) => item.key === id ? { ...item, completed: !item.completed } : item);
+    setTareas(nuevasTareas);
+    guardarTareas(nuevasTareas);
+  };
+
+  const eliminarTarea = (id) => {
+    const nuevasTareas = tareas.filter((item) => item.key !== id);
+    setTareas(nuevasTareas);
+    guardarTareas(nuevasTareas);
+  };
+
+  const guardarTareas = async (tareas) => {
+    try {
+      const jsonValue = JSON.stringify(tareas);
+      await AsyncStorage.setItem('@tareas', jsonValue);
+    } catch (e) {
+      console.error("Error al guardar las tareas", e);
+    }
+  };
+
+  const cargarTareas = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@tareas');
+      return jsonValue != null ? JSON.parse(jsonValue) : [];
+    } catch (e) {
+      console.error("Error al cargar las tareas", e);
+    }
+  };
+
+  const mostrarDateTimePicker = (modo) => {
+    setModoPicker(modo);
+    setMostrarPicker(true);
+  };
+
+  const onChangeFecha = (event, selectedDate) => {
+    const currentDate = selectedDate || fecha;
+    setMostrarPicker(Platform.OS === 'ios');
+    setFecha(currentDate);
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={DATA}
-        renderItem={({ item }) => <Item title={item.title} />}
-        keyExtractor={item => item.id}
+    <View style={styles.container}>
+      <Text style={styles.title}>Lista de Tareas</Text>
+      
+      <TextInput
+        style={styles.input}
+        placeholder="Escribe una tarea"
+        onChangeText={setTarea}
+        value={tarea}
       />
-    </SafeAreaView>
+
+      {/* <Button title="Seleccionar Fecha" onPress={() => mostrarDateTimePicker('date')} />
+      <Button title="Seleccionar Hora" onPress={() => mostrarDateTimePicker('time')} /> */}
+
+      {/* {mostrarPicker && (
+        <DateTimePicker
+          value={fecha}
+          mode={modoPicker}
+          display="default"
+          onChange={onChangeFecha}
+        />
+      )} */}
+
+      <Pressable style={styles.pressable} onPress={añadirtarea}>
+        <Text style={styles.pressableText}>Añadir Tarea</Text>
+      </Pressable>
+
+      <FlatList
+        data={tareas}
+        renderItem={({ item }) => (
+          <View style={styles.tareaContainer}>
+            <Text
+              style={[
+                styles.tareaText,
+                { textDecorationLine: item.completed ? 'line-through' : 'none' },
+              ]}
+            >
+              {item.text}
+            </Text>
+            <Text style={styles.fechaHoraText}>
+              {item.fecha} - {item.hora}
+            </Text>
+            <View style={styles.actions}>
+              <TouchableOpacity onPress={() => completarTarea(item.key)}>
+                <Text style={styles.completeButton}>
+                  {item.completed ? 'Desmarcar' : 'Completar'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => eliminarTarea(item.key)}>
+                <Text style={styles.deleteButton}>Eliminar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+      />
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
+  // Estilos similares a los anteriores
   container: {
     flex: 1,
-    marginTop: StatusBar.currentHeight || 0,
-  },
-  item: {
-    backgroundColor: '#4157FA',
-    borderRadius: 10,
-    padding: 10,
-    marginVertical: 8,
-    marginHorizontal: 16,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
   },
   title: {
-    fontSize: 32,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    padding: 10,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 10,
+    borderRadius: 5,
+  },
+  pressable: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  pressableText: {
     color: 'white',
+    fontSize: 18,
+  },
+  tareaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+  },
+  tareaText: {
+    fontSize: 18,
+  },
+  fechaHoraText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  actions: {
+    flexDirection: 'row',
+  },
+  completeButton: {
+    marginRight: 10,
+    color: 'green',
+  },
+  deleteButton: {
+    color: 'red',
   },
 });
-
-export default App;
