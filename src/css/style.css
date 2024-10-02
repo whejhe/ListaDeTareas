@@ -1,0 +1,16 @@
+.container {
+    background-color: rgb(170, 167, 167);
+    font-family: 'Courier New', Courier, monospace;
+    height: 500px;
+    width: 100px;
+}
+
+
+.buttons{
+    background-color: sandybrown;
+    color: white;
+    border-radius: 8px;
+    border: 1px solid black;
+    width: fit-content;
+    padding: 0.5em 1em;
+}

@@ -1,0 +1,12 @@
+Crear Proyecto Vacio:
+npx create-expo-app@latest miExpoApp2 --template blank
+
+Añadir Expo Globalmente:
+npm install -g expo-cli
+npm install -g eas-cli
+
+Añadir web:
+npx expo install react-native-web react-dom @expo/metro-runtime
+
+Iniciar Proyecto:
+npm start
