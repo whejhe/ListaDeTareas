@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Pressable, Button, Platform } from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DateTimePicker from '@react-native-community/datetimepicker';
-
 
 
 export default function App() {
   const [tarea, setTarea] = useState('');
   const [tareas, setTareas] = useState([]);
-  const [fecha, setFecha] = useState(new Date());
-  const [mostrarPicker, setMostrarPicker] = useState(false);
-  const [modoPicker, setModoPicker] = useState('date'); // Puede ser 'date' o 'time'
 
   useEffect(() => {
     const obtenerTareas = async () => {
@@ -25,11 +20,9 @@ export default function App() {
   const añadirtarea = () => {
     if (tarea.length > 0) {
       const nuevasTareas = [...tareas, { 
-        key: Math.random().toString(), 
-        text: tarea, 
-        completed: false, 
-        fecha: fecha.toLocaleDateString(), 
-        hora: fecha.toLocaleTimeString() 
+        key: Math.random().toString(),
+        text: tarea,
+        completed: false,
       }];
       setTareas(nuevasTareas);
       setTarea(''); // Limpia el input después de añadir una nueva tarea
@@ -67,17 +60,6 @@ export default function App() {
     }
   };
 
-  const mostrarDateTimePicker = (modo) => {
-    setModoPicker(modo);
-    setMostrarPicker(true);
-  };
-
-  const onChangeFecha = (event, selectedDate) => {
-    const currentDate = selectedDate || fecha;
-    setMostrarPicker(Platform.OS === 'ios');
-    setFecha(currentDate);
-  };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lista de Tareas</Text>
@@ -88,18 +70,6 @@ export default function App() {
         onChangeText={setTarea}
         value={tarea}
       />
-
-      {/* <Button title="Seleccionar Fecha" onPress={() => mostrarDateTimePicker('date')} />
-      <Button title="Seleccionar Hora" onPress={() => mostrarDateTimePicker('time')} /> */}
-
-      {/* {mostrarPicker && (
-        <DateTimePicker
-          value={fecha}
-          mode={modoPicker}
-          display="default"
-          onChange={onChangeFecha}
-        />
-      )} */}
 
       <Pressable style={styles.pressable} onPress={añadirtarea}>
         <Text style={styles.pressableText}>Añadir Tarea</Text>
@@ -138,7 +108,6 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  // Estilos similares a los anteriores
   container: {
     flex: 1,
     paddingTop: 50,

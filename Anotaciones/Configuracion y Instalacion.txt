@@ -18,5 +18,6 @@ Usar una Librería Compatible con Web y Móvil para Fechas
 npm install react-native-paper-dates
 npm install react-native-paper
 
-
-
+punycode module deprecate (arreglar error)
+npm install unicode-regex
+const { decode, encode } = require('unicode-regex');
